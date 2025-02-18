@@ -1,0 +1,21 @@
+svg#freepik_stories-to-do-list:not(.animated) .animable {
+  opacity: 0;
+  transform-origin: 249.921px 255.965px;
+}
+svg#freepik_stories-to-do-list.animated #freepik--Notebook--inject-87 {
+  animation: 1.5s Infinite linear floating;
+  animation-delay: 0s;
+}
+@keyframes floating {
+  0% {
+    opacity: 1;
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0px);
+  }
+}
