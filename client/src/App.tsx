@@ -7,6 +7,7 @@ import {
 } from "react-router-dom";
 import Login from "./pages/Login/Login";
 import Register from "./pages/Register/Register";
+import Navbar from "./components/Navbar/Navbar";
 
 interface AuthContextProps {
   isLoggedIn: boolean;
@@ -91,6 +92,7 @@ function App() {
 
   return (
     <AuthContext.Provider value={{ isLoggedIn, login, logout }}>
+      <Navbar/>
       <Router>
         <Routes>
           <Route path="/login" element={<Login />} />
