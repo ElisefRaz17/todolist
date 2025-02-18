@@ -1,4 +1,5 @@
 ## Todo List App
+🚧Project Status: In Progress 🔃
 ⚙️ Tech Stack 
   - React.js
   - Node.js
