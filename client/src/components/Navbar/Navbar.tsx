@@ -1,10 +1,16 @@
 import { Paper, Typography, Button } from "@mui/material";
 import React,{useContext} from "react";
 import Logo from "../../assets/Logo.png";
-import { AuthContext } from "../../App";
+import { AuthContext, useAuth } from "../../App";
+import { useNavigate } from "react-router-dom";
 
 function Navbar() {
-    const {isLoggedIn} = useContext(AuthContext)
+const {logout,token} = useAuth()
+const navigate = useNavigate()
+const handleLogout = () => {
+    logout();
+    navigate("/login")
+};
   return (
     <Paper
       sx={{
@@ -22,7 +28,7 @@ function Navbar() {
           To Do Today
         </Typography>
       </div>
-      {isLoggedIn ? <Button variant="contained">Sign Out</Button>:""}
+       {token && <Button variant="contained" onClick={handleLogout}>Sign Out</Button>}
     </Paper>
   );
 }

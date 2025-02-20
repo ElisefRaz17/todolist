@@ -75,7 +75,7 @@ function Register() {
               Sign Up
             </Typography>
             <div style={{ display: "flex", flexDirection: "row" }}>
-              <form onSubmit={handleSubmit}>
+              <form onSubmit={handleSubmit} className="register-form">
                 <CustomText
                   label="Username"
                   name="username"

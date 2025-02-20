@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { ReactNode, useContext, useEffect, useState } from "react";
 import {
   BrowserRouter as Router,
   Route,
@@ -8,106 +8,72 @@ import {
 import Login from "./pages/Login/Login";
 import Register from "./pages/Register/Register";
 import Navbar from "./components/Navbar/Navbar";
+import Home from "./pages/Home/Home";
+import jwt from "jsonwebtoken";
+
 
 interface AuthContextProps {
-  isLoggedIn: boolean;
-  login: () => void;
+  token: string | null | any;
+  login: (newToken: string | any) => void;
   logout: () => void;
 }
 
 export const AuthContext = React.createContext<AuthContextProps>({
-  isLoggedIn: false,
   login: () => {},
   logout: () => {},
+  token: null,
 });
+interface AuthProviderProps {
+  children: ReactNode;
+}
 
-// function LoginPage() {
-//   const { login } = React.useContext(AuthContext);
-//   const [username, setUsername] = useState("");
-//   const [password, setPassword] = useState("");
-
-//   const handleLogin = () => {
-//     // Basic authentication logic
-//     if (username === "user" && password === "password") {
-//       login();
-//     } else {
-//       alert("Invalid credentials");
-//     }
-//   };
-
-//   return (
-//     <div>
-//       <h2>Login</h2>
-//       <input
-//         type="text"
-//         placeholder="Username"
-//         value={username}
-//         onChange={(e) => setUsername(e.target.value)}
-//       />
-//       <input
-//         type="password"
-//         placeholder="Password"
-//         value={password}
-//         onChange={(e) => setPassword(e.target.value)}
-//       />
-//       <button onClick={handleLogin}>Login</button>
-//     </div>
-//   );
-// }
-
-// function RegisterPage() {
-//   return (
-//     <div>
-//       <h2>Register</h2>
-//       {/* Registration form here */}
-//     </div>
-//   );
-// }
-
-function HomePage() {
-  const { logout } = React.useContext(AuthContext);
-  return (
-    <div>
-      <h2>Home</h2>
-      <button onClick={logout}>Logout</button>
-    </div>
+const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+  const [token, setToken] = useState<string | null>(
+    localStorage.getItem("token")
   );
-}
+  useEffect(() => {}, [token]);
 
-function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { isLoggedIn } = React.useContext(AuthContext);
-  return isLoggedIn ? <>{children}</> : <Navigate to="/login" />;
-}
-
-function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-  const login = () => {
-    setIsLoggedIn(true);
+  const login = (newToken: string) => {
+    setToken(newToken);
+    localStorage.setItem("token", newToken);
   };
 
   const logout = () => {
-    setIsLoggedIn(false);
+    setToken(null);
+    localStorage.removeItem("token");
   };
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn, login, logout }}>
-      <Navbar/>
+    <AuthContext.Provider value={{ token, login, logout }}>
+      {children}
+    </AuthContext.Provider>
+  );
+};
+
+export const useAuth = () => {
+  return useContext(AuthContext);
+};
+
+const ProtectedRoute: React.FC<{ element: React.ReactElement }> = ({
+  element,
+}) => {
+  const { token } = useAuth();
+
+  return token ? element : <Navigate to="/login" replace />;
+};
+
+function App() {
+  return (
+    <AuthProvider>
       <Router>
+      <Navbar />
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route
-            path="/"
-            element={
-              <ProtectedRoute>
-                <HomePage />
-              </ProtectedRoute>
-            }
-          />
+          <Route path="/" element={<ProtectedRoute element={<Home />} />} />
         </Routes>
       </Router>
-    </AuthContext.Provider>
+    </AuthProvider>
   );
 }
 

@@ -50,7 +50,25 @@ async function run() {
                 res.status(500).json({ message: 'Server error.' })
             }
         })
-
+        app.post('/login', async(req,res)=>{
+            const {username,password} = req.body
+            try{
+               await databaseCollection.findOne({username:username}).then(user=> {
+                    if(user){
+                        if(user.password === password){
+                            res.json("Success")
+                        }else{
+                            res.json("The password is incorrect")
+                        }
+                    }else{
+                        res.json("No user exists")
+                    }
+                })
+            }catch(error){
+                console.log('Errpr:', error)
+                res.status(500).json({ message: 'Server error.' })
+            }
+        })
 
     } finally {
         // Close the MongoDB client when done
