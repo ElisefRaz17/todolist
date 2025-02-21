@@ -20,9 +20,13 @@ import {
   SelectChangeEvent,
 } from "@mui/material";
 import Logo from "../../assets/AddNew.png";
-import { DataGrid, GridColDef } from "@mui/x-data-grid";
+import { DataGrid, GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
 import { parseISO, format } from "date-fns";
-import "./home.module.css";
+import "./home.css";
+import dayjs from "dayjs";
+import { Edit } from "@mui/icons-material";
+import {v4 as uuidv4} from "uuid"
+import axios from "axios";
 const style = {
   position: "absolute",
   top: "50%",
@@ -42,10 +46,36 @@ function Home() {
   const apiRef = useRef(null);
   let rowIdCounter = 1;
   const [openForm, setOpenForm] = useState(false);
-  const [name, setName] = useState<string>("");
-  const [deadline, setDeadline] = useState<string>();
   const [status, setStatus] = useState("Not Started");
-  const [description, setDescription] = useState("");
+  const [formData, setFormData] = useState({
+    name: "",
+    deadline: "",
+    status: `${status}`,
+    description: "",
+  });
+  const [rows, setRows] = useState<any>([]);
+  const handleChange = (e: any) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+  const addToDatabase = async(e:any) => {
+    e.preventDefault()
+    try{
+      const response = await axios.post('http://localhost:500/addTodo',{
+        formData
+      })
+
+    }catch(error){
+      console.log("Adding Todo to Database failed: ", error)
+    }
+  }
+  const addNewTodo = (e: any) => {
+    e.preventDefault();
+    const newRow = { id: uuidv4(), ...formData };
+    setRows([...rows, newRow]);
+    setFormData({ name: "", deadline: "", status: `${status}`, description: "" });
+    addToDatabase(e)
+  };
+
   const columns: GridColDef[] = [
     { field: "id", headerName: "ID", type: "string", width: 70 },
     { field: "status", headerName: "Status", type: "string", width: 70 },
@@ -55,9 +85,20 @@ function Home() {
       type: "date",
       width: 120,
       valueFormatter: (params: any) => {
-        if (!params.value) return "";
-        const date = parseISO(params.value);
-        return format(date, "dd/MM/yyyy");
+        if (!params.value) {
+          return "";
+        }
+
+        try {
+          const parsedDate = parseISO(params.value);
+          return format(parsedDate, "yyyy-MM-dd");
+        } catch (error) {
+          console.error("Error parsing date:", error);
+          return "Invalid Date";
+        }
+      },
+      renderCell: (params: GridRenderCellParams) => {
+        return dayjs(params.value).format("YYYY-MM-DD"); // Format the date as needed
       },
       editable: true,
     },
@@ -69,18 +110,7 @@ function Home() {
       width: 130,
     },
   ];
-  const rows = [
-    {
-      id: 1,
-      name: "Test",
-      description: "Description",
-      status: false,
-      deadline: "12/25/2025",
-    },
-  ];
-  const addNewRow = () => {
-    // const newRow = {id:rowIdCounter++,}
-  };
+
   const handleOpenForm = (e: any) => {
     e.preventDefault();
     setOpenForm(true);
@@ -89,15 +119,16 @@ function Home() {
     e.preventDefault();
     setOpenForm(false);
   };
-  const handleStatusChange = (e: SelectChangeEvent) => {
+  const handleStatusChange = (e: any) => {
     setStatus(e.target.value as string);
   };
-  const addNewTodo = (e: any) => {
-    e.preventDefault();
-  };
+
   return (
     <Paper>
-      <Typography>Todo List</Typography>
+      <Typography variant="h5" fontFamily="monospace">
+        Todo List
+      </Typography>
+      <Edit />
       <Button variant="contained" onClick={handleOpenForm}>
         Add New ToDo
       </Button>
@@ -145,22 +176,22 @@ function Home() {
             }}
           >
             <TextField
-              name={name}
-              value={name}
+              name="name"
+              value={formData.name}
               label="Name"
               InputLabelProps={{ shrink: true }}
               placeholder="ex: Schedule Scrum Meeting"
               sx={{ maxWidth: "300px" }}
-              onChange={(e) => setName(e.target.value)}
+              onChange={handleChange}
             />
             <TextField
-              name={deadline}
-              value={deadline}
+              name="deadline"
+              value={formData.deadline}
               label="Deadline"
               type="date"
               InputLabelProps={{ shrink: true }}
               sx={{ maxWidth: "300px" }}
-              onChange={(e) => setDeadline(e.target.value)}
+              onChange={handleChange}
             />
             <FormControl fullWidth>
               <InputLabel id="demo-simple-select-label">Status</InputLabel>
@@ -177,13 +208,13 @@ function Home() {
               </Select>
             </FormControl>
             <TextField
-              name={description}
+              name="description"
               label="Description"
               multiline
               placeholder="ex: We will review current project status"
-              value={description}
+              value={formData.description}
               InputLabelProps={{ shrink: true }}
-              onChange={(e) => setDescription(e.target.value)}
+              onChange={handleChange}
               sx={{ maxWidth: "300px" }}
             />
 

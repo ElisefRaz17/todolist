@@ -11,7 +11,7 @@ import {
 } from "@mui/material";
 import React, { SyntheticEvent, useState } from "react";
 import axios from "axios";
-import "./register.module.css";
+import "./register.css";
 import SvgIcon from "../../TodoList";
 // import {ReactComponent as TodoAnimation} from "../../assets/to-do-list-animate.svg"
 

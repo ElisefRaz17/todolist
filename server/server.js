@@ -46,8 +46,27 @@ async function run() {
                 }
 
             } catch (error) {
-                console.log('Errpr:', error)
+                console.log('Error:', error)
                 res.status(500).json({ message: 'Server error.' })
+            }
+        })
+        app.post('/addTodo', async(req,res)=>{
+            const database = client.db("todo-list");
+            const databaseCollection = database.collection("todoItems");
+            const {userId,status,deadline,name,description} = req.body
+            try{
+                const existingItem = await databaseCollection.findOne({name})
+                if(existingItem){
+                    res.status(400).json({ message: 'Todo item already exists' })
+                    
+                }else{
+                    await databaseCollection.insertOne(req.body)
+                    res.status(201).json({message:'Todo Item created successfully'})
+                }
+            
+            }catch(error){
+                console.log("Error:",error)
+                res.status(500).json({message:'Server error.'})
             }
         })
         app.post('/login', async(req,res)=>{
@@ -57,6 +76,7 @@ async function run() {
                     if(user){
                         if(user.password === password){
                             res.json("Success")
+                            console.log(user._id)
                         }else{
                             res.json("The password is incorrect")
                         }

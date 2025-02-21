@@ -13,6 +13,7 @@ import { Form, useNavigate } from "react-router-dom";
 import axios from "axios";
 import jwt from "jsonwebtoken";
 import { randomBytes } from "crypto";
+import "./login.css"
 
 const Container = styled(Paper)(({ theme }) => ({
   backgroundColor: "#86BBD8",
@@ -75,7 +76,7 @@ function Login() {
           <Typography variant="h3" color="white">
             Login
           </Typography>
-          <form>
+          <form className="login-form">
             <CustomText
               type="text"
               placeholder="Username"
