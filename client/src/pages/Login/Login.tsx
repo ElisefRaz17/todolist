@@ -50,6 +50,7 @@ function Login() {
   const [password, setPassword] = useState("");
   const { login } = useAuth()
   const navigate = useNavigate();
+  const { setCredentialsState } = useContext(AuthContext)
 
   
   const handleLogin = async (e: any) => {
@@ -59,6 +60,7 @@ function Login() {
         username,
         password,
       });
+      setCredentialsState({username:username,password:password})
       const token = generateToken();
       localStorage.setItem("token", token);
       if (response.status === 200) {

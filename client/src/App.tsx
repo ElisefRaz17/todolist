@@ -9,19 +9,23 @@ import Login from "./pages/Login/Login";
 import Register from "./pages/Register/Register";
 import Navbar from "./components/Navbar/Navbar";
 import Home from "./pages/Home/Home";
-import jwt from "jsonwebtoken";
+
 
 
 interface AuthContextProps {
   token: string | null | any;
   login: (newToken: string | any) => void;
   logout: () => void;
+  credentialsState: null | any;
+  setCredentialsState: React.Dispatch<React.SetStateAction<any>>;
 }
 
 export const AuthContext = React.createContext<AuthContextProps>({
   login: () => {},
   logout: () => {},
   token: null,
+  credentialsState:null,
+  setCredentialsState:()=>{}
 });
 interface AuthProviderProps {
   children: ReactNode;
@@ -31,6 +35,7 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [token, setToken] = useState<string | null>(
     localStorage.getItem("token")
   );
+  const [credentialsState,setCredentialsState]=useState(null)
   useEffect(() => {}, [token]);
 
   const login = (newToken: string) => {
@@ -44,7 +49,7 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ token, login, logout }}>
+    <AuthContext.Provider value={{ token, login, logout,credentialsState,setCredentialsState }}>
       {children}
     </AuthContext.Provider>
   );

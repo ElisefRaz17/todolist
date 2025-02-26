@@ -1,4 +1,10 @@
-import React, { ChangeEvent, useRef, useState } from "react";
+import React, {
+  ChangeEvent,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import {
   Paper,
   Typography,
@@ -25,8 +31,9 @@ import { parseISO, format } from "date-fns";
 import "./home.css";
 import dayjs from "dayjs";
 import { Edit } from "@mui/icons-material";
-import {v4 as uuidv4} from "uuid"
+import { v4 as uuidv4 } from "uuid";
 import axios from "axios";
+import { AuthContext } from "../../App";
 const style = {
   position: "absolute",
   top: "50%",
@@ -45,36 +52,67 @@ const style = {
 function Home() {
   const apiRef = useRef(null);
   let rowIdCounter = 1;
+  const { credentialsState } = useContext(AuthContext);
   const [openForm, setOpenForm] = useState(false);
   const [status, setStatus] = useState("Not Started");
+  const [todos,setTodos] = useState([])
   const [formData, setFormData] = useState({
     name: "",
     deadline: "",
     status: `${status}`,
     description: "",
   });
-  const [rows, setRows] = useState<any>([]);
+  console.log('Credentials',credentialsState)
+  const [rows, setRows] = useState<any>(todos);
   const handleChange = (e: any) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
-  const addToDatabase = async(e:any) => {
-    e.preventDefault()
-    try{
-      const response = await axios.post('http://localhost:500/addTodo',{
-        formData
-      })
-
-    }catch(error){
-      console.log("Adding Todo to Database failed: ", error)
+  const addToDatabase = async (e: any) => {
+    e.preventDefault();
+    try {
+      fetch(`http://localhost:5000/todos`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `${credentialsState.username}:${credentialsState.password}`,
+        },
+        body: JSON.stringify(formData),
+      }).then(() => {});
+      // const response = await axios.post('http://localhost:5000/todos',headers:{},{
+      //   formData
+      // })
+    } catch (error) {
+      console.log("Adding Todo to Database failed: ", error);
     }
-  }
+  };
   const addNewTodo = (e: any) => {
     e.preventDefault();
     const newRow = { id: uuidv4(), ...formData };
     setRows([...rows, newRow]);
-    setFormData({ name: "", deadline: "", status: `${status}`, description: "" });
-    addToDatabase(e)
+    setFormData({
+      name: "",
+      deadline: "",
+      status: `${status}`,
+      description: "",
+    });
+    addToDatabase(e);
   };
+  const fetchTodos = async () => {
+    fetch(`http://localhost:5000/todos`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `${credentialsState.username}:${credentialsState.password}`,
+      },
+    }).then((response)=>response.json()).then((data)=>setTodos(data));
+    // console.log("Fetched Todos: ", response.data);
+  };
+  useEffect(() => {
+
+      fetchTodos();
+  
+  }, []);
+  console.log('Fetched Todo Items',todos)
 
   const columns: GridColDef[] = [
     { field: "id", headerName: "ID", type: "string", width: 70 },
@@ -133,10 +171,11 @@ function Home() {
         Add New ToDo
       </Button>
       <DataGrid
-        rows={rows}
+        rows={todos}
         columns={columns}
         pageSizeOptions={[5, 10]}
         checkboxSelection
+        getRowId={id=>"_id"}
         sx={{ border: 0 }}
       />
       <Modal

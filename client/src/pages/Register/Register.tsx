@@ -9,10 +9,12 @@ import {
   Typography,
   styled,
 } from "@mui/material";
-import React, { SyntheticEvent, useState } from "react";
+import {v4 as uuidv4} from "uuid"
+import React, { SyntheticEvent, useContext, useState } from "react";
 import axios from "axios";
 import "./register.css";
 import SvgIcon from "../../TodoList";
+import { AuthContext } from "../../App";
 // import {ReactComponent as TodoAnimation} from "../../assets/to-do-list-animate.svg"
 
 const Container = styled(Paper)(({ theme }) => ({
@@ -43,9 +45,13 @@ const CustomText = styled(TextField)(({ theme }) => ({
   },
 }));
 function Register() {
-  const [newUser, setNewUser] = useState({ username: "", password: "" });
+  const [newUser, setNewUser] = useState({
+    username: "",
+    password: ""
+  });
+  const { setCredentialsState } = useContext(AuthContext)
   const [error, setError] = useState<any>(null);
-  const [openError,setOpenError] = useState(false)
+  const [openError, setOpenError] = useState(false);
   const handleSubmit = (e: any) => {
     e.preventDefault();
     axios
@@ -55,11 +61,15 @@ function Register() {
         setError(err);
         // console.log(err);
       });
-    setNewUser({ username: "", password: "" });
-    setOpenError(true)
+    setNewUser({
+      username: "",
+      password: ""
+    });
+    setCredentialsState({username: newUser.username, password: newUser.password})
+    setOpenError(true);
   };
-  const handleClose = (event:any, reason:any) => {
-    if (reason === 'clickaway') {
+  const handleClose = (event: any, reason: any) => {
+    if (reason === "clickaway") {
       return;
     }
 
@@ -81,7 +91,7 @@ function Register() {
                   name="username"
                   placeholder="Username"
                   value={newUser.username}
-                  onChange={(e:any) =>
+                  onChange={(e: any) =>
                     setNewUser({ ...newUser, username: e.target.value })
                   }
                 ></CustomText>
@@ -90,7 +100,7 @@ function Register() {
                   name="password"
                   placeholder="Password"
                   value={newUser.password}
-                  onChange={(e:any) =>
+                  onChange={(e: any) =>
                     setNewUser({ ...newUser, password: e.target.value })
                   }
                 ></CustomText>
@@ -109,10 +119,14 @@ function Register() {
         </CustomCard>
       </Container>
       {error && (
-        <Snackbar open={openError} autoHideDuration={6000} onClose={handleClose}>
-        <Alert variant="filled" severity="error" sx={{ zIndex: 10 }}>
-          {error.response.data["message"]}
-        </Alert>
+        <Snackbar
+          open={openError}
+          autoHideDuration={6000}
+          onClose={handleClose}
+        >
+          <Alert variant="filled" severity="error" sx={{ zIndex: 10 }}>
+            {error.response.data["message"]}
+          </Alert>
         </Snackbar>
       )}
     </>
