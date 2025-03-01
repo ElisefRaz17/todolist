@@ -1,14 +1,14 @@
 require("dotenv").config();
 const express = require("express");
-const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
-const mongoose = require("mongoose")
+const { MongoClient, ServerApiVersion, ObjectId, Schema } = require("mongodb");
+const mongoose = require("mongoose");
 const app = express();
 const cors = require("cors");
+const { SchemaTypes } = require("mongoose");
 const port = 5000;
 
 
 
-// const ObjectId = require("mongoose").Type.ObjectId;
 
 mongoose.connect("mongodb://localhost/todo-list", {
     useUnifiedTopology: true,
@@ -30,7 +30,10 @@ const todosSchema = new mongoose.Schema({
             deadline: String,
             description: String,
             name: String,
-            id: String,
+            _id: {
+                type: SchemaTypes.ObjectId,
+                default: () => new mongoose.Types.ObjectId()
+            },
         },
     ],
 }, { collection: 'todos' });
@@ -97,6 +100,7 @@ app.post("/todos", async (req, res) => {
 app.get("/todos", async (req, res) => {
     const { authorization } = req.headers;
     const [username, password] = authorization.split(":", 2);
+    console.log('Todo Authorization',authorization)
     const user = await User.findOne({ username }).exec();
     if (!user || user.password !== password) {
         res.status(403);
@@ -105,8 +109,51 @@ app.get("/todos", async (req, res) => {
         });
         return;
     }
-    const { todos } = await Todos.findOne({ userId: user._id }).exec(); 
+    const { todos } = await Todos.findOne({ userId: user._id }).exec();
     res.json(todos);
+});
+app.delete('/todos/:id', async (req, res) => {
+    // var { id } = req.params;
+    const { authorization } = req.headers;
+    console.log('Delete Authorization',authorization)
+    const [username, password] = authorization.split(":", 2);
+    const user = await User.findOne({ username }).exec();
+    if (!user || user.password !== password) {
+        res.status(403);
+        res.json({
+            message: "invalid access",
+        });
+        return;
+    }
+    try {
+        // if (typeof id === 'string' && id.match(/^[0-9a-fA-F]{24}$/)) {
+            // id = new mongoose.Types.ObjectId(id);
+        // }
+        const deletedTodo = await Todos.updateOne({},{'$pull':{'todos':{'_id':`${new mongoose.Types.ObjectId(req.params.id)}`}}},{multi:true})
+        // const deletedTodo = await Todos.findOne({_id: new mongoose.Types.ObjectId(req.params.id)})
+        if (!deletedTodo) {
+            return res.status(404).send({ message: 'Todo not found' });
+        }
+        // await deletedTodo.remove()
+        // res.json(deletedTodo)
+        res.status(200).send({ message: 'Todo deleted successfully' });
+    } catch (err) {
+        res.status(400).send({ error: 'Error deleting Todo: ' + err.message });
+    }
+})
+app.put('/todos/:id', async (req, res) => {
+    const { id } = req.params;
+    const { task, status } = req.body;
+
+    try {
+        const updatedTodo = await Todos.findByIdAndUpdate(id, { task, status }, { new: true, runValidators: true });
+        if (!updatedTodo) {
+            return res.status(404).send({ message: 'Todo not found' });
+        }
+        res.status(200).send(updatedTodo);
+    } catch (err) {
+        res.status(400).send({ error: 'Error updating Todo: ' + err.message });
+    }
 });
 
 const db = mongoose.connection;

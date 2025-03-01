@@ -1,38 +1,28 @@
-import React, {
-  ChangeEvent,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import {
   Paper,
   Typography,
-  Table,
-  Button,
   Modal,
   TextField,
-  Radio,
-  RadioGroup,
-  FormControlLabel,
   FormControl,
-  FormLabel,
-  Card,
-  CardContent,
   Box,
   InputLabel,
   MenuItem,
   Select,
-  SelectChangeEvent,
+  Button,
 } from "@mui/material";
 import Logo from "../../assets/AddNew.png";
-import { DataGrid, GridColDef, GridRenderCellParams } from "@mui/x-data-grid";
+import {
+  DataGrid,
+  GridActionsCellItem,
+  GridColDef,
+  GridRenderCellParams,
+} from "@mui/x-data-grid";
 import { parseISO, format } from "date-fns";
 import "./home.css";
 import dayjs from "dayjs";
-import { Edit } from "@mui/icons-material";
+import { Delete, Edit } from "@mui/icons-material";
 import { v4 as uuidv4 } from "uuid";
-import axios from "axios";
 import { AuthContext } from "../../App";
 const style = {
   position: "absolute",
@@ -50,19 +40,34 @@ const style = {
   borderRadius: "8px",
 };
 function Home() {
-  const apiRef = useRef(null);
-  let rowIdCounter = 1;
+  const apiRef = useRef<any>(null);
   const { credentialsState } = useContext(AuthContext);
+  const [user, setUser] = useState<any>(null);
+  const [username, setUsername] = useState(null);
+  const [password, setPassword] = useState(null);
   const [openForm, setOpenForm] = useState(false);
   const [status, setStatus] = useState("Not Started");
-  const [todos,setTodos] = useState([])
+  const [todos, setTodos] = useState([]);
+  const [selectedRows, setSelectedRows] = useState<any>([]);
   const [formData, setFormData] = useState({
     name: "",
     deadline: "",
     status: `${status}`,
     description: "",
   });
-  console.log('Credentials',credentialsState)
+  useEffect(() => {
+    const storedUser: any = localStorage.getItem("User");
+    if (storedUser) {
+      try {
+        setUser(JSON.parse(storedUser));
+        setUsername(JSON.parse(storedUser.username));
+      } catch (error) {
+        setUser(JSON.parse(storedUser));
+      }
+    }
+    setUser(JSON.parse(storedUser));
+  }, []);
+
   const [rows, setRows] = useState<any>(todos);
   const handleChange = (e: any) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -74,7 +79,7 @@ function Home() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `${credentialsState.username}:${credentialsState.password}`,
+          Authorization: `${user.username}:${user.password}`,
         },
         body: JSON.stringify(formData),
       }).then(() => {});
@@ -84,6 +89,22 @@ function Home() {
     } catch (error) {
       console.log("Adding Todo to Database failed: ", error);
     }
+  };
+  const deleteFromData = async (id: number) => {
+    try {
+      fetch(`http://localhost:5000/todos/${id}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `${user.username}:${user.password}`,
+        },
+      });
+    } catch (error) {}
+  };
+
+  const handleDeleteRow = (row: any) => {
+    setRows(rows.filter((row: any) => !selectedRows.includes(row["_id"])));
+    deleteFromData(row["_id"]);
   };
   const addNewTodo = (e: any) => {
     e.preventDefault();
@@ -102,20 +123,22 @@ function Home() {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `${credentialsState.username}:${credentialsState.password}`,
+        Authorization: `${user.username}:${user.password}`,
       },
-    }).then((response)=>response.json()).then((data)=>setTodos(data));
+    })
+      .then((response) => response.json())
+      .then((data) => setTodos(data));
     // console.log("Fetched Todos: ", response.data);
   };
   useEffect(() => {
-
+    if (user) {
       fetchTodos();
-  
-  }, []);
-  console.log('Fetched Todo Items',todos)
+    }
+  }, [user]);
+  console.log("Fetched Todo Items", todos);
 
   const columns: GridColDef[] = [
-    { field: "id", headerName: "ID", type: "string", width: 70 },
+    { field: "_id", headerName: "ID", type: "string", width: 70 },
     { field: "status", headerName: "Status", type: "string", width: 70 },
     {
       field: "deadline",
@@ -147,6 +170,21 @@ function Home() {
       type: "string",
       width: 130,
     },
+    {
+      field: "deleteAction",
+
+      headerName: "Actions",
+
+      type: "actions",
+
+      getActions: (params) => [
+        <GridActionsCellItem
+          icon={<Delete />}
+          onClick={() => handleDeleteRow(params.row)}
+          label="Delete"
+        />,
+      ],
+    },
   ];
 
   const handleOpenForm = (e: any) => {
@@ -171,11 +209,12 @@ function Home() {
         Add New ToDo
       </Button>
       <DataGrid
+        apiRef={apiRef}
         rows={todos}
         columns={columns}
         pageSizeOptions={[5, 10]}
         checkboxSelection
-        getRowId={id=>"_id"}
+        getRowId={(id) => "_id"}
         sx={{ border: 0 }}
       />
       <Modal
