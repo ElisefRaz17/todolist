@@ -56,17 +56,31 @@ function Login() {
   const handleLogin = async (e: any) => {
     e.preventDefault();
     try {
-      const response = await axios.post("http://localhost:5000/login", {
-        username,
-        password,
+      // const response = await axios.post("http://localhost:5000/login", {
+      //   username,
+      //   password,
+      // });
+      const response = await fetch('http://localhost:5000/login',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({username,password})
       });
+      const data = await response.json()
+      if(response.ok){
+        localStorage.setItem("token",data.token)
+        localStorage.setItem("User",JSON.stringify({username:username,password:password}))
+
+      }else{
+        console.log(response.status)
+      }
+
       setCredentialsState({username:username,password:password})
-      const token = generateToken();
-      localStorage.setItem("token", token);
+      // const token = generateToken();
+      // localStorage.setItem("token", token);
   
       localStorage.setItem("User",JSON.stringify({username:username,password:password}))
       if (response.status === 200) {
-        login(token);
+        login(data.token);
         navigate("/");
       }
     } catch (error) {

@@ -59,14 +59,16 @@ function Register() {
       .then((result) => console.log(result))
       .catch((err) => {
         setError(err);
-        // console.log(err);
+        console.log(err);
       });
-    setNewUser({
-      username: "",
-      password: ""
-    });
-    setCredentialsState({username: newUser.username, password: newUser.password})
-    setOpenError(true);
+      setCredentialsState({username: newUser.username, password: newUser.password})
+   
+    // setNewUser({
+    //   username: "",
+    //   password: ""
+    // });
+    // setCredentialsState({username: newUser.username, password: newUser.password})
+    // setOpenError(true);
   };
   const handleClose = (event: any, reason: any) => {
     if (reason === "clickaway") {
