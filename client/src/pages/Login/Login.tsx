@@ -42,9 +42,8 @@ const CustomText = styled(TextField)(({ theme }) => ({
     },
   },
 }));
-function generateToken(){
-  return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15) + Date.now().toString(36);
-}
+
+
 function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -60,7 +59,7 @@ function Login() {
       //   username,
       //   password,
       // });
-      const response = await fetch('http://localhost:5000/login',{
+      const response = await fetch('http://localhost:5000/api/auth/login',{
         method:'POST',
         headers:{'Content-Type':'application/json'},
         body:JSON.stringify({username,password})

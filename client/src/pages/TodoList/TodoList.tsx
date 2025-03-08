@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
 import Logo from "../../assets/AddNew.png";
 import { parseISO, format } from "date-fns";
-import "./home.css";
+import "../Home/home.css";
 import dayjs from "dayjs";
 import { v4 as uuidv4 } from "uuid";
 import { AuthContext } from "../../App";
@@ -14,6 +14,12 @@ import {
   Modal,
   Paper,
   Select,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
   TextField,
   Typography,
 } from "@mui/material";
@@ -43,7 +49,9 @@ const style = {
 const TodoListForm = ({ userId, onTodoListCreated }: any) => {
   const apiRef = useRef<any>(null);
   const { credentialsState } = useContext(AuthContext);
+
   const [user, setUser] = useState<any>(null);
+  const [token, setToken] = useState<any>(null);
   const [openForm, setOpenForm] = useState(false);
   const [status, setStatus] = useState("Not Started");
   const [username, setUsername] = useState<any>("");
@@ -58,66 +66,70 @@ const TodoListForm = ({ userId, onTodoListCreated }: any) => {
 
   useEffect(() => {
     const storedUser: any = localStorage.getItem("User");
+    const token: any = localStorage.getItem("token");
     if (storedUser) {
       try {
         setUser(JSON.parse(storedUser));
+        setToken(token);
       } catch (error) {
         setUser(JSON.parse(storedUser));
+        setToken(token);
       }
     }
     setUser(JSON.parse(storedUser));
+    setToken(token);
   }, []);
 
   const [rows, setRows] = useState<any | undefined>(todos);
   const handleChange = (e: any) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
-  const updateTodoList = async (e: any) => {
-    e.preventDefault();
-    try {
-      fetch(`http://localhost:5000/todos`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `${user.username}:${user.password}`,
-        },
-        body: JSON.stringify(formData),
-      });
-    } catch (error) {}
-  };
-  const addToDatabase = async (e: any) => {
-    e.preventDefault();
-    try {
-      fetch(`http://localhost:5000/todos`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `${user.username}:${user.password}`,
-        },
-        body: JSON.stringify(formData),
-      }).then(() => {});
-      // const response = await axios.post('http://localhost:5000/todos',headers:{},{
-      //   formData
-      // })
-    } catch (error) {
-      console.log("Adding Todo to Database failed: ", error);
-    }
-  };
-  const deleteFromData = async (id: number) => {
-    try {
-      fetch(`http://localhost:5000/todos/${id}`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `${user.username}:${user.password}`,
-        },
-      });
-    } catch (error) {}
-  };
+  //   const updateTodoList = async (e: any) => {
+  //     e.preventDefault();
+  //     try {
+  //       fetch(`http://localhost:5000/api/todos`, {
+  //         method: "",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //           Authorization: `${token}`,
+  //         },
+  //         body: JSON.stringify(formData),
+  //       });
+  //     } catch (error) {}
+  //   };
+  //   const addToDatabase = async (e: any) => {
+  //     e.preventDefault();
+  //     try {
+  //       fetch(`http://localhost:5000/todos`, {
+  //         method: "POST",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //           Authorization: `${user.username}:${user.password}`,
+  //         },
+  //         body: JSON.stringify(formData),
+  //       }).then(() => {});
+  //       // const response = await axios.post('http://localhost:5000/todos',headers:{},{
+  //       //   formData
+  //       // })
+  //     } catch (error) {
+  //       console.log("Adding Todo to Database failed: ", error);
+  //     }
+  //   };
+  //   const deleteFromData = async (id: number) => {
+  //     try {
+  //       fetch(`http://localhost:5000/todos/${id}`, {
+  //         method: "DELETE",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //           Authorization: `${user.username}:${user.password}`,
+  //         },
+  //       });
+  //     } catch (error) {}
+  //   };
 
   const handleDeleteRow = (row: any) => {
     setRows(rows.filter((row: any) => !selectedRows.includes(row["_id"])));
-    deleteFromData(row["_id"]);
+    // deleteFromData(row["_id"]);
   };
   const addNewTodo = (e: any) => {
     e.preventDefault();
@@ -129,14 +141,14 @@ const TodoListForm = ({ userId, onTodoListCreated }: any) => {
       status: `${status}`,
       description: "",
     });
-    addToDatabase(e);
+    // addToDatabase(e);
   };
   const fetchTodos = async () => {
-    fetch(`http://localhost:5000/todos`, {
+    fetch(`http://localhost:5000/api/todos`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `${user.username}:${user.password}`,
+        Authorization: `${token}`,
       },
     })
       .then((response) => response.json())
@@ -212,7 +224,7 @@ const TodoListForm = ({ userId, onTodoListCreated }: any) => {
   const handleStatusChange = (e: any) => {
     setStatus(e.target.value as string);
   };
-  console.log("Username", username);
+
   return (
     <Paper>
       <Typography variant="h5" fontFamily="monospace">
@@ -222,15 +234,34 @@ const TodoListForm = ({ userId, onTodoListCreated }: any) => {
       <Button variant="contained" onClick={handleOpenForm}>
         Add New ToDo
       </Button>
-      <DataGrid
-        apiRef={apiRef}
-        rows={todos}
-        columns={columns}
-        pageSizeOptions={[5, 10]}
-        checkboxSelection
-        getRowId={(id) => "_id"}
-        sx={{ border: 0 }}
-      />
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableCell>Name</TableCell>
+            <TableCell>Status</TableCell>
+            <TableCell>Deadline</TableCell>
+            <TableCell>Description</TableCell>
+          </TableHead>
+          <TableBody>
+            {todos.map((row:any) => (
+              <TableRow key={row["_id"]}>
+                <TableCell>
+                    {row.name}
+                </TableCell>
+                <TableCell>
+                    {row.description}
+                </TableCell>
+                <TableCell>
+                    {row.deadline}
+                </TableCell>
+                <TableCell>
+                    {row.status}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
       <Modal
         open={openForm}
         onClose={handleCloseForm}

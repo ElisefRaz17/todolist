@@ -16,7 +16,7 @@ const { connectDB } = require('./config/config.js'); // Import connectDB from co
 const errorHandler = require('./utils/errorHandler.js');
 const authRoutes = require('./routes/authRoutes.js');
 const todoRoutes = require('./routes/todoRoutes.js');
-
+const cors = require('cors')
 
 // Initialize Express app
 const app = express();
@@ -26,6 +26,7 @@ connectDB(); // Call connectDB function
 
 // Middleware
 app.use(express.json());
+app.use(cors())
 
 // Routes
 app.use('/api/auth', authRoutes);
