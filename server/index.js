@@ -29,8 +29,10 @@ app.use(express.json());
 app.use(cors())
 
 // Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/todos', todoRoutes);
+// app.use('/api/auth', authRoutes);
+// app.use('/api/todos', todoRoutes);
+app.use('/auth', authRoutes);
+app.use('/todos', todoRoutes);
 
 // Error handler middleware
 app.use(errorHandler);

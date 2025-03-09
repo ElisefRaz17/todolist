@@ -16,7 +16,7 @@ const connectDB = async () => {
 
 module.exports = {
     mongoURI: process.env.MONGO_URI || 'mongodb+srv://frazierelise07:iEtmuRFEbTpTWxrX@cluster0.ihm99.mongodb.net/todo-list',
-    jwtSecret: process.env.JWT_SECRET || 'your_jwt_secret',
+    jwtSecret: process.env.JWT_SECRET || 'secret',
     email: {
         host: process.env.EMAIL_HOST || 'frazier.elise07@gmail.com',
         port: process.env.EMAIL_PORT || 587,

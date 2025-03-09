@@ -55,7 +55,7 @@ function Register() {
   const handleSubmit = (e: any) => {
     e.preventDefault();
     axios
-      .post("http://localhost:5000/register", newUser)
+      .post("http://localhost:5000/api/auth/register", newUser)
       .then((result) => console.log(result))
       .catch((err) => {
         setError(err);

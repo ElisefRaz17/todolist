@@ -9,8 +9,7 @@ import Login from "./pages/Login/Login";
 import Register from "./pages/Register/Register";
 import Navbar from "./components/Navbar/Navbar";
 import Home from "./pages/Home/Home";
-
-
+import "./App.css";
 
 interface AuthContextProps {
   token: string | null | any;
@@ -24,8 +23,8 @@ export const AuthContext = React.createContext<AuthContextProps>({
   login: () => {},
   logout: () => {},
   token: null,
-  credentialsState:null,
-  setCredentialsState:()=>{}
+  credentialsState: null,
+  setCredentialsState: () => {},
 });
 interface AuthProviderProps {
   children: ReactNode;
@@ -35,7 +34,7 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [token, setToken] = useState<string | null>(
     localStorage.getItem("token")
   );
-  const [credentialsState,setCredentialsState]=useState(null)
+  const [credentialsState, setCredentialsState] = useState(null);
   useEffect(() => {}, [token]);
 
   const login = (newToken: string) => {
@@ -49,7 +48,9 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ token, login, logout,credentialsState,setCredentialsState }}>
+    <AuthContext.Provider
+      value={{ token, login, logout, credentialsState, setCredentialsState }}
+    >
       {children}
     </AuthContext.Provider>
   );
@@ -69,16 +70,20 @@ const ProtectedRoute: React.FC<{ element: React.ReactElement }> = ({
 
 function App() {
   return (
-    <AuthProvider>
-      <Router>
-      <Navbar />
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/" element={<ProtectedRoute element={<Home />} />} />
-        </Routes>
-      </Router>
-    </AuthProvider>
+    <div className="app-container">
+      <AuthProvider>
+        <Router>
+          <Navbar />
+          <main className="content">
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/" element={<ProtectedRoute element={<Home />} />} />
+            </Routes>
+          </main>
+        </Router>
+      </AuthProvider>
+    </div>
   );
 }
 
