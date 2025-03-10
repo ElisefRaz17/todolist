@@ -29,7 +29,6 @@ export const createTodo = createAsyncThunk(
         },
       }
     );
-    console.log("Create New Item", response.data);
   }
 );
 export const updateTodo = createAsyncThunk(

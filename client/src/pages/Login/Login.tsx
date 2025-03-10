@@ -9,19 +9,17 @@ import {
 } from "@mui/material";
 import React, { useState, useContext } from "react";
 import { AuthContext, useAuth } from "../../App";
-import { Form, useNavigate } from "react-router-dom";
-import axios from "axios";
-import jwt from "jsonwebtoken";
-import { randomBytes } from "crypto";
+import { useNavigate } from "react-router-dom";
 import "./login.css"
 
 const Container = styled(Paper)(({ theme }) => ({
-  backgroundColor: "#86BBD8",
+  backgroundColor: "inherit",
   display: "flex",
   width: "100%",
   height: "100vh",
   alignItems: "center",
   justifyContent: "center",
+  boxShadow:"none"
 }));
 const CustomCard = styled(Card)(({ theme }) => ({
   backgroundColor: "#2B59C3",
@@ -55,11 +53,7 @@ function Login() {
   const handleLogin = async (e: any) => {
     e.preventDefault();
     try {
-      // const response = await axios.post("http://localhost:5000/login", {
-      //   username,
-      //   password,
-      // });
-      const response = await fetch('http://localhost:5000/auth/login',{
+      const response = await fetch(`${process.env['REACT_APP_BACKEND_PORT']}/auth/login`,{
         method:'POST',
         headers:{'Content-Type':'application/json'},
         body:JSON.stringify({username,password})
@@ -74,8 +68,6 @@ function Login() {
       }
 
       setCredentialsState({username:username,password:password})
-      // const token = generateToken();
-      // localStorage.setItem("token", token);
   
       localStorage.setItem("User",JSON.stringify({username:username,password:password}))
       if (response.status === 200) {

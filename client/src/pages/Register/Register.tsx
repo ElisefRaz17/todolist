@@ -9,13 +9,11 @@ import {
   Typography,
   styled,
 } from "@mui/material";
-import {v4 as uuidv4} from "uuid"
-import React, { SyntheticEvent, useContext, useState } from "react";
+import React, { useContext, useState } from "react";
 import axios from "axios";
 import "./register.css";
-import SvgIcon from "../../TodoList";
+import SvgIcon from "../../SVGIcon";
 import { AuthContext } from "../../App";
-// import {ReactComponent as TodoAnimation} from "../../assets/to-do-list-animate.svg"
 
 const Container = styled(Paper)(({ theme }) => ({
   backgroundColor: "#86BBD8",
@@ -55,20 +53,13 @@ function Register() {
   const handleSubmit = (e: any) => {
     e.preventDefault();
     axios
-      .post("http://localhost:5000/api/auth/register", newUser)
+      .post(`${process.env['REACT_APP_BACKEND_PORT']}/api/auth/register`, newUser)
       .then((result) => console.log(result))
       .catch((err) => {
         setError(err);
         console.log(err);
       });
       setCredentialsState({username: newUser.username, password: newUser.password})
-   
-    // setNewUser({
-    //   username: "",
-    //   password: ""
-    // });
-    // setCredentialsState({username: newUser.username, password: newUser.password})
-    // setOpenError(true);
   };
   const handleClose = (event: any, reason: any) => {
     if (reason === "clickaway") {
