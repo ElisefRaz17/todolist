@@ -1,16 +1,15 @@
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { parseISO, format } from "date-fns";
 import "../Home/home.css";
 import dayjs from "dayjs";
 import { AuthContext } from "../../App";
-import {
-  Button,
-  Card,
-  Toolbar,
-  Paper,
-  Typography,
-  Box,
-} from "@mui/material";
+import { Button, Card, Toolbar, Paper, Typography, Box } from "@mui/material";
 import { Add, Cancel, Delete, Edit, Save } from "@mui/icons-material";
 import {
   GridColDef,
@@ -40,6 +39,8 @@ const TodoListForm = () => {
   const [username, setUsername] = useState<any>("");
   const [todos, setTodos] = useState([]);
   const [selectedRows, setSelectedRows] = useState<any>([]);
+  const [selectedTodo, setSelectedTodo] = useState<any>(null);
+  const [todoContent, setTodoContent] = useState<any>([]);
   const [formData, setFormData] = useState<any>({
     name: "",
     deadline: "",
@@ -62,14 +63,11 @@ const TodoListForm = () => {
   }, []);
   console.log("Token", token);
 
-  const [rows, setRows] = useState<any>(todos);
+  const [rows, setRows] = useState<any>([]);
   const handleChange = (e: any) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleDeleteRow = (row: any) => {
-    setRows(rows.filter((row: any) => !selectedRows.includes(row["_id"])));
-  };
   const addNewTodo = (e: any) => {
     e.preventDefault();
     setFormData({
@@ -104,12 +102,61 @@ const TodoListForm = () => {
     setRowModesModel({ ...rowModesModel, [_id]: { mode: GridRowModes.Edit } });
   };
 
+  // const handleSaveClick = (_id: any, row: any) => async () => {
+  //   const row = rows.find((r: any) => r._id === _id);
+  //   try {
+  //     const response = await axios.put(
+  //       `http://localhost:5000/todos/${_id}`,
+  //       row,
+  //       {
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //           Authorization: `${localStorage.getItem("token")}`,
+  //         },
+  //       }
+  //     );
+  //     if (response.status !== 200) {
+  //       throw new Error(`HTTP error! status: ${response.status}`);
+  //     }
+
+  //     fetchTodos(); // Refresh data after successful update
+  //     setRowModesModel({
+  //       ...rowModesModel,
+  //       [_id]: { mode: GridRowModes.View },
+  //     });
+  //   } catch (error) {
+  //     console.error("Error updating todo:", error);
+  //     // Handle error appropriately, e.g., show a notification to the user
+  //   }
+  // };
   const handleSaveClick = (_id: GridRowId) => () => {
     setRowModesModel({ ...rowModesModel, [_id]: { mode: GridRowModes.View } });
-  };
+  }
 
-  const handleDeleteClick = (_id: GridRowId) => () => {
-    setRows(rows.filter((row:any) => row._id !== _id));
+  //   fetch(`http://localhost:5000/todos/${_id}`, {
+  //     method: "PUT",
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //       Authorization: `${token}`,
+  //     },
+  //     body: JSON.stringify({ todoContent }),
+  //   }).then((response) => console.log(response.json()));
+  // };
+
+  const handleDeleteClick = (_id: GridRowId) => async () => {
+    setRows(rows.filter((row: any) => row._id !== _id));
+    const response = await axios.delete(
+      `http://localhost:5000/todos/${_id}`,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `${localStorage.getItem("token")}`,
+        },
+      }
+    );
+    if (response.status !== 200) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
   };
 
   const handleCancelClick = (_id: GridRowId) => () => {
@@ -118,9 +165,9 @@ const TodoListForm = () => {
       [_id]: { mode: GridRowModes.View, ignoreModifications: true },
     });
 
-    const editedRow = rows.find((row:any) => row._id === _id);
+    const editedRow = rows.find((row: any) => row._id === _id);
     if (editedRow!.isNew) {
-      setRows(rows.filter((row:any) => row._id !== _id));
+      setRows(rows.filter((row: any) => row._id !== _id));
     }
   };
   useEffect(() => {
@@ -134,7 +181,13 @@ const TodoListForm = () => {
   }, []);
 
   const columns: GridColDef[] = [
-    { field: "status", headerName: "Status", type: "string", width: 70, editable:true },
+    {
+      field: "status",
+      headerName: "Status",
+      type: "string",
+      width: 70,
+      editable: true,
+    },
     {
       field: "deadline",
       headerName: "Deadline",
@@ -158,20 +211,27 @@ const TodoListForm = () => {
       },
       editable: true,
     },
-    { field: "name", headerName: "Name", type: "string", width: 130 },
+    {
+      field: "name",
+      headerName: "Name",
+      type: "string",
+      width: 130,
+      editable: true,
+    },
     {
       field: "description",
       headerName: "Description",
       type: "string",
       width: 130,
+      editable: true,
     },
     {
-      field: 'actions',
-      type: 'actions',
-      headerName: 'Actions',
+      field: "actions",
+      type: "actions",
+      headerName: "Actions",
       width: 100,
-      cellClassName: 'actions',
-      getActions: ({ id }) => {
+      cellClassName: "actions",
+      getActions: ({ id, row }) => {
         const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit;
 
         if (isInEditMode) {
@@ -179,14 +239,16 @@ const TodoListForm = () => {
             <GridActionsCellItem
               icon={<Save />}
               label="Save"
+              key={`save-${id}`}
               sx={{
-                color: 'primary.main',
+                color: "primary.main",
               }}
               onClick={handleSaveClick(id)}
             />,
             <GridActionsCellItem
               icon={<Cancel />}
               label="Cancel"
+              key={`cancel-${id}`}
               className="textPrimary"
               onClick={handleCancelClick(id)}
               color="inherit"
@@ -198,6 +260,7 @@ const TodoListForm = () => {
           <GridActionsCellItem
             icon={<Edit />}
             label="Edit"
+            key={`edit-${id}`}
             className="textPrimary"
             onClick={handleEditClick(id)}
             color="inherit"
@@ -205,6 +268,7 @@ const TodoListForm = () => {
           <GridActionsCellItem
             icon={<Delete />}
             label="Delete"
+            key={`edit-${id}`}
             onClick={handleDeleteClick(id)}
             color="inherit"
           />,
@@ -229,11 +293,29 @@ const TodoListForm = () => {
       event.defaultMuiPrevented = true;
     }
   };
-  const processRowUpdate = (newRow: GridRowModel) => {
-    const updatedRow = { ...newRow, isNew: false };
+
+  const processRowUpdate = async (newRow: GridRowModel) => {
+  
+      const response = await axios.put(
+        `http://localhost:5000/todos/${newRow._id}`,
+        newRow,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      if (response.status !== 200) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+    
+
+    const updatedRow = { ...newRow };
     setRows(
-      rows.map((row: { _id: any }) => (row._id === newRow._id ? updatedRow : row))
+      rows.map((row:any) => (row._id === newRow._id ? response.data : row))
     );
+
     return updatedRow;
   };
 
@@ -243,7 +325,7 @@ const TodoListForm = () => {
   console.log("Data Grid rows", rows);
 
   return (
-    <Paper sx={{width:'100%'}}>
+    <Paper sx={{ width: "100%" }}>
       <Card
         sx={{
           height: 500,
@@ -265,11 +347,23 @@ const TodoListForm = () => {
           rows={rows}
           columns={columns}
           getRowId={(row) => row["_id"]}
+          autoHeight={true}
           editMode="row"
           rowModesModel={rowModesModel}
           onRowModesModelChange={handleRowModesModelChange}
           onRowEditStop={handleRowEditStop}
           processRowUpdate={processRowUpdate}
+          // processRowUpdate={(newRow, oldRow) => {
+          //   // Update your data source here (e.g., using useState or an API call)
+          //   const updatedRows = rows.map((row:any) =>
+          //     row._id === newRow._id ? newRow.data : row
+          //   );
+          //   setRows(updatedRows); // Update the state
+          //   return newRow.data; // Return the updated row
+          // }}
+          onProcessRowUpdateError={(error) => {
+            console.error("Error updating row:", error);
+          }}
         />
       </Card>
       <NewForm
