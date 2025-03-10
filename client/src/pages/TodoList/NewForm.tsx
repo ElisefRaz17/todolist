@@ -79,11 +79,11 @@ function NewForm(props: any) {
           <FormControl fullWidth>
             <InputLabel id="demo-simple-select-label">Status</InputLabel>
             <Select
-              labelId="demo-simple-select-label"
               id="demo-simple-select"
-              value={props.status}
+              value={props.formData.status}
+              name="status"
               label="Status"
-              onChange={props.handleStatusChange}
+              onChange={props.handleChange}
             >
               <MenuItem value="in-progress">In Progress</MenuItem>
               <MenuItem value="not-started">Not Started</MenuItem>
