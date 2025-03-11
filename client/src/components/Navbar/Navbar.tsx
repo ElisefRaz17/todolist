@@ -1,6 +1,7 @@
 import { Paper, Typography, Button } from "@mui/material";
 import React from "react";
 import Logo from "../../assets/Logo.png";
+import AppTitle from "../../assets/AppTitle.png";
 import { useAuth } from "../../App";
 import { useNavigate } from "react-router-dom";
 
@@ -23,10 +24,7 @@ const handleLogout = () => {
       }}
     >
       <div style={{ display: "flex", alignItems: "center", gap:'2rem' }}>
-        <img src={Logo} width={50} height={50} alt="logo"/>
-        <Typography variant="h4" color="white">
-          To Do Today
-        </Typography>
+        <img src={AppTitle} width={104} height={104} alt="app-name"/>
       </div>
        {token && <Button variant="contained" onClick={handleLogout}>Sign Out</Button>}
     </Paper>

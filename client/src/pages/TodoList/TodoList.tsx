@@ -1,7 +1,15 @@
 import React, { useEffect, useState } from "react";
 import "../Home/home.css";
-import { Button, Card, Toolbar, Paper } from "@mui/material";
-import { Add, Cancel, Delete, Edit, Save } from "@mui/icons-material";
+import {
+  Button,
+  Card,
+  Toolbar,
+  Paper,
+  Alert,
+  Snackbar,
+  SnackbarCloseReason,
+} from "@mui/material";
+import { Add, Cancel, Check, Delete, Edit, Save } from "@mui/icons-material";
 import {
   GridColDef,
   GridActionsCellItem,
@@ -31,7 +39,7 @@ import {
 
 const TodoListForm = (props: any) => {
   const dispatch = useDispatch<AppDispatch>();
-  const { todos, loading, error } = useSelector(
+  const { todos, loading, error, statusCode } = useSelector(
     (state: RootState) => state.todos
   );
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>(
@@ -41,6 +49,7 @@ const TodoListForm = (props: any) => {
   const [userId, setUserId] = useState<any>(null);
   const [token, setToken] = useState<any>(null);
   const [openForm, setOpenForm] = useState(false);
+  const [openSuccess, setOpenSuccess] = useState(false);
   const [formData, setFormData] = useState<any>({
     name: "",
     deadline: "",
@@ -59,13 +68,13 @@ const TodoListForm = (props: any) => {
   const handleChange = (e: any) => {
     // setFormData({ ...formData, [e.target.name]: e.target.value });
     const { name, value } = e.target;
-    setFormData((prevState:any) => ({
+    setFormData((prevState: any) => ({
       ...prevState,
       [name]: value,
     }));
   };
 
-  const addNewTodo = (e: any) => {
+  const addNewTodo = async (e: any) => {
     e.preventDefault();
     setFormData({
       name: "",
@@ -74,10 +83,25 @@ const TodoListForm = (props: any) => {
       description: "",
       user: `${userId}`,
     });
-    dispatch(createTodo(formData));
+    await dispatch(createTodo(formData));
+    if (statusCode === 200) {
+      dispatch(fetchTodos());
+      handleCloseForm();
+      setOpenSuccess(true)
+    }
   };
   const handleEditClick = (_id: GridRowId) => () => {
     setRowModesModel({ ...rowModesModel, [_id]: { mode: GridRowModes.Edit } });
+  };
+  const handleClose = (
+    event?: React.SyntheticEvent | Event,
+    reason?: SnackbarCloseReason
+  ) => {
+    if (reason === "clickaway") {
+      return;
+    }
+
+    setOpenSuccess(false);
   };
 
   const handleSaveClick = (_id: GridRowId) => () => {
@@ -86,7 +110,8 @@ const TodoListForm = (props: any) => {
 
   const handleDeleteClick = (_id: GridRowId) => async () => {
     todos.filter((row: any) => row._id !== _id);
-    dispatch(deleteTodo(_id));
+    await dispatch(deleteTodo(_id));
+    dispatch(fetchTodos());
   };
 
   const handleCancelClick = (_id: GridRowId) => () => {
@@ -142,7 +167,7 @@ const TodoListForm = (props: any) => {
 
         return [
           <GridActionsCellItem
-            icon={<Edit />}
+            icon={<Edit sx={{color:'#13274F'}}/>}
             label="Edit"
             key={`edit-${id}`}
             className="textPrimary"
@@ -150,7 +175,7 @@ const TodoListForm = (props: any) => {
             color="inherit"
           />,
           <GridActionsCellItem
-            icon={<Delete />}
+            icon={<Delete sx={{color:'#13274F'}} />}
             label="Delete"
             key={`edit-${id}`}
             onClick={handleDeleteClick(id)}
@@ -165,8 +190,7 @@ const TodoListForm = (props: any) => {
     e.preventDefault();
     setOpenForm(true);
   };
-  const handleCloseForm = (e: any) => {
-    e.preventDefault();
+  const handleCloseForm = () => {
     setOpenForm(false);
   };
   const handleRowEditStop: GridEventListener<"rowEditStop"> = (
@@ -232,6 +256,20 @@ const TodoListForm = (props: any) => {
         open={openForm}
         onClose={handleCloseForm}
       />
+      <Snackbar
+        open={openSuccess}
+        autoHideDuration={6000}
+        onClose={handleClose}
+      >
+        <Alert
+          onClose={handleClose}
+          severity="success"
+          variant="filled"
+          sx={{ width: "100%" }}
+        >
+          Todo Successfully created!
+        </Alert>
+      </Snackbar>
     </Paper>
   );
 };

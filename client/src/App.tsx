@@ -10,6 +10,7 @@ import Register from "./pages/Register/Register";
 import Navbar from "./components/Navbar/Navbar";
 import Home from "./pages/Home/Home";
 import "./App.css";
+import Footer from "./components/Footer/Footer";
 
 interface AuthContextProps {
   token: string | null | any;
@@ -81,6 +82,7 @@ function App() {
               <Route path="/" element={<ProtectedRoute element={<Home />} />} />
             </Routes>
           </main>
+          <Footer/>
         </Router>
       </AuthProvider>
     </div>

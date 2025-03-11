@@ -16,12 +16,12 @@ import SvgIcon from "../../SVGIcon";
 import { AuthContext } from "../../App";
 
 const Container = styled(Paper)(({ theme }) => ({
-  backgroundColor: "#86BBD8",
+  backgroundColor: "inherit",
   display: "flex",
   width: "100%",
-  height: "100vh",
   alignItems: "center",
   justifyContent: "center",
+  boxShadow:'none'
 }));
 const CustomCard = styled(Card)(({ theme }) => ({
   backgroundColor: "#2B59C3",

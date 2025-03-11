@@ -7,6 +7,7 @@ const todoSlice = createSlice({
     todos: [],
     loading: false,
     error: null,
+    statusCode:null
   },
   reducers: {},
   extraReducers: (builder) => {
@@ -15,13 +16,15 @@ const todoSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchTodos.fulfilled, (state, action) => {
+      .addCase(fetchTodos.fulfilled, (state:any, action) => {
         state.loading = false;
         state.todos = action.payload;
+        state.statusCode = 200;
       })
-      .addCase(fetchTodos.rejected, (state:any, action) => {
+      .addCase(fetchTodos.rejected, (state:any, action:any) => {
         state.loading = false;
         state.error = action.error.message;
+        state.statusCode= action.payload?.status || 500
       });
   },
 });
