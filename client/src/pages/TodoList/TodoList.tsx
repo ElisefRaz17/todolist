@@ -230,13 +230,14 @@ const TodoListForm = (props: any) => {
         }}
       >
         <Toolbar>
-          <Button color="primary" startIcon={<Add />} onClick={handleOpenForm}>
+          <Button color="primary" startIcon={<Add />} onClick={handleOpenForm} aria-label="Add Todo Button">
             Add Todo
           </Button>
         </Toolbar>
         <DataGrid
           rows={todos}
           columns={columns}
+          aria-label="todos-table"
           getRowId={(row) => row["_id"]}
           autoHeight={true}
           editMode="row"

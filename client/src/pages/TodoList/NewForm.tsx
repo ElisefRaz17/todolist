@@ -57,12 +57,14 @@ function NewForm(props: any) {
               alignItems: "center",
               gap: "2rem",
             }}
+            aria-label="New TodoList Form"
           >
             <input hidden value={props.formData.user} name="user" />
             <TextField
               name="name"
               value={props.formData.name}
               label="Name"
+              aria-label="todo-name"
               InputLabelProps={{ shrink: true }}
               placeholder="ex: Schedule Scrum Meeting"
               sx={{ maxWidth: "300px" }}
@@ -72,6 +74,7 @@ function NewForm(props: any) {
               name="deadline"
               value={props.formData.deadline}
               label="Deadline"
+              aria-label="todo-deadline"
               type="date"
               InputLabelProps={{ shrink: true }}
               sx={{ maxWidth: "300px" }}
@@ -84,6 +87,7 @@ function NewForm(props: any) {
                 value={props.formData.status}
                 name="status"
                 label="Status"
+                aria-label="todo-status"
                 onChange={props.handleChange}
               >
                 <MenuItem value="In Progress">In Progress</MenuItem>
@@ -94,6 +98,7 @@ function NewForm(props: any) {
             <TextField
               name="description"
               label="Description"
+              aria-label="todo-description"
               multiline
               placeholder="ex: We will review current project status"
               value={props.formData.description}
@@ -107,6 +112,7 @@ function NewForm(props: any) {
               type="submit"
               size="small"
               sx={{ width: "200px" }}
+              aria-label="Add New Todo button"
             >
               Add New Item
             </Button>

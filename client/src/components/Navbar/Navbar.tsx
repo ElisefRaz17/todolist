@@ -22,11 +22,12 @@ const handleLogout = () => {
         alignItems: "center",
         justifyContent: "space-between",
       }}
+      aria-label="navigation=bar"
     >
       <div style={{ display: "flex", alignItems: "center", gap:'2rem' }}>
         <img src={AppTitle} width={104} height={104} alt="app-name"/>
       </div>
-       {token && <Button variant="contained" onClick={handleLogout}>Sign Out</Button>}
+       {token && <Button variant="contained" aria-label="signout-button" onClick={handleLogout}>Sign Out</Button>}
     </Paper>
   );
 }

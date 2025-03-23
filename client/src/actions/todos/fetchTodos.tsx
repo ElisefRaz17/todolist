@@ -29,6 +29,7 @@ export const createTodo = createAsyncThunk(
         },
       }
     );
+    return response.data
   }
 );
 export const updateTodo = createAsyncThunk(

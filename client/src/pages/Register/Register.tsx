@@ -78,10 +78,11 @@ function Register() {
               Sign Up
             </Typography>
             <div style={{ display: "flex", flexDirection: "row" }}>
-              <form onSubmit={handleSubmit} className="register-form">
+              <form onSubmit={handleSubmit} className="register-form" aria-label="Sign Up Form">
                 <CustomText
                   label="Username"
                   name="username"
+                  aria-label="Username"
                   placeholder="Username"
                   value={newUser.username}
                   onChange={(e: any) =>
@@ -91,13 +92,14 @@ function Register() {
                 <CustomText
                   label="Password"
                   name="password"
+                  aria-label="Password"
                   placeholder="Password"
                   value={newUser.password}
                   onChange={(e: any) =>
                     setNewUser({ ...newUser, password: e.target.value })
                   }
                 ></CustomText>
-                <Button type="submit" variant="contained">
+                <Button type="submit" variant="contained" aria-label="Register Button">
                   Register User
                 </Button>
               </form>

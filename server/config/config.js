@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 
 const connectDB = async () => {
     try {
-        await mongoose.connect('mongodb+srv://frazierelise07:iEtmuRFEbTpTWxrX@cluster0.ihm99.mongodb.net/todo-list', {
+        await mongoose.connect(`${proccess.env['MONGO_URI']}`, {
             useNewUrlParser: true,
             useUnifiedTopology: true,
         });
@@ -15,7 +15,7 @@ const connectDB = async () => {
 };
 
 module.exports = {
-    mongoURI: process.env.MONGO_URI || 'mongodb+srv://frazierelise07:iEtmuRFEbTpTWxrX@cluster0.ihm99.mongodb.net/todo-list',
+    mongoURI: process.env.MONGO_URI || `${proccess.env['MONGO_URI']}`,
     jwtSecret: process.env.JWT_SECRET || 'secret',
     email: {
         host: process.env.EMAIL_HOST || 'frazier.elise07@gmail.com',

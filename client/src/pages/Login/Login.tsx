@@ -87,12 +87,14 @@ function Login() {
           <form className="login-form">
             <CustomText
               type="text"
+              aria-label="Username"
               placeholder="Username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
             />
             <CustomText
               type="password"
+              aria-label="Password"
               placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -100,6 +102,7 @@ function Login() {
             <Button
               disableRipple
               type="submit"
+              aria-label="Login Button"
               onClick={handleLogin}
               variant="contained"
             >
